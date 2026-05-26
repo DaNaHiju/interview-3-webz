@@ -1,0 +1,17 @@
+----------------------------------------
+Time     : 2026-05-26 12:30:11
+Node     : Served by: webz-001
+Response : <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Webz Home Task</title>
+</head>
+<body>
+    <h1>Junior DevOps Engineer - Home Task</h1>
+    <!-- webz-001 is replaced at container startup so Jenkins logs show
+         which physical node (webz-001/002/003) served the response -->
+    <p>Served by: webz-001</p>
+</body>
+</html>
+----------------------------------------

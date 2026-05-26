@@ -1,0 +1,95 @@
+version: "3.8"
+
+services:
+
+  webz-001:
+    build:
+      context: ./cluster-node
+    container_name: webz-001
+    hostname: webz-001
+    privileged: true
+    extra_hosts:
+      - "webz-001:172.20.0.2"
+      - "webz-002:172.20.0.3"
+      - "webz-003:172.20.0.4"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - ./corosync.conf:/etc/corosync/corosync.conf:ro
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+    networks:
+      webz-net:
+        ipv4_address: 172.20.0.2
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+
+  webz-002:
+    build:
+      context: ./cluster-node
+    container_name: webz-002
+    hostname: webz-002
+    privileged: true
+    extra_hosts:
+      - "webz-001:172.20.0.2"
+      - "webz-002:172.20.0.3"
+      - "webz-003:172.20.0.4"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - ./corosync.conf:/etc/corosync/corosync.conf:ro
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+    networks:
+      webz-net:
+        ipv4_address: 172.20.0.3
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+
+  webz-003:
+    build:
+      context: ./cluster-node
+    container_name: webz-003
+    hostname: webz-003
+    privileged: true
+    extra_hosts:
+      - "webz-001:172.20.0.2"
+      - "webz-002:172.20.0.3"
+      - "webz-003:172.20.0.4"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - ./corosync.conf:/etc/corosync/corosync.conf:ro
+    tmpfs:
+      - /run
+      - /run/lock
+      - /tmp
+    networks:
+      webz-net:
+        ipv4_address: 172.20.0.4
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+
+  webz-004:
+    build:
+      context: ./jenkins-node
+    container_name: webz-004
+    hostname: webz-004
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./jenkins-logs:/var/log/webz
+    networks:
+      webz-net:
+        ipv4_address: 172.20.0.5
+
+networks:
+  webz-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24

@@ -1,0 +1,15 @@
+# Logs
+jenkins-logs/
+*.log
+
+# Docker runtime files
+.docker/
+
+# OS files (WSL/Linux)
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+*.swp
+*.swo

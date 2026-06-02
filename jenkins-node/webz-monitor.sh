@@ -10,16 +10,26 @@ FLOATING_IP="172.20.0.100"
 PORT="80"
 LOG_FILE="/var/log/webz/monitor.log"
 
+# --- make sure log dir exists ---
 mkdir -p /var/log/webz
 
+# --- timestamp for this run ---
 RUN_TIME=$(date '+%Y-%m-%d %H:%M:%S')
 
-# set +e so that a non-zero curl exit doesn't abort the script under sh -xe
-set +e
+# --- curl the floating IP ---
+# -s  = silent (no progress bar)
+# -o  = write response body to variable
+# -w  = write HTTP status code after
+# --max-time 10 = fail after 10s so job doesn't hang
 HTTP_RESPONSE=$(curl -s --max-time 10 "http://${FLOATING_IP}:${PORT}")
 CURL_EXIT=$?
-set -e
 
+# --- extract the serving node name from the response HTML ---
+# The index.html page contains: "Served by: webz-00X"
+# grep pulls that line, then sed strips the HTML tags
+SERVING_NODE=$(echo "$HTTP_RESPONSE" | grep "Served by" | sed 's/<[^>]*>//g' | xargs)
+
+# --- handle curl failure (e.g. cluster is down) ---
 if [ $CURL_EXIT -ne 0 ]; then
     echo "----------------------------------------" >> "$LOG_FILE"
     echo "Time     : $RUN_TIME"                     >> "$LOG_FILE"
@@ -29,9 +39,7 @@ if [ $CURL_EXIT -ne 0 ]; then
     exit 1
 fi
 
-# grep returns exit 1 when there's no match; || true prevents sh -xe from aborting
-SERVING_NODE=$(echo "$HTTP_RESPONSE" | grep "Served by" | sed 's/<[^>]*>//g' | xargs || true)
-
+# --- append the record ---
 echo "----------------------------------------" >> "$LOG_FILE"
 echo "Time     : $RUN_TIME"                     >> "$LOG_FILE"
 echo "Node     : $SERVING_NODE"                 >> "$LOG_FILE"

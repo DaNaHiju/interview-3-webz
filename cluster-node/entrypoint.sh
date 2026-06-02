@@ -2,7 +2,7 @@
 # Inject real container hostname into the homepage
 sed -i "s/HOSTNAME/$(hostname)/g" /var/www/html/index.html
 
-# 1. Start dbus (required by pacemaker and pcsd)
+# 1. Start dbus
 mkdir -p /run/dbus
 dbus-daemon --system --fork
 
@@ -12,11 +12,18 @@ corosync
 # 3. Start pacemaker
 /usr/sbin/pacemakerd &
 
-# 4. Start pcsd (use init.d — correct for Ubuntu 18.04)
+# 4. Start pcsd
 /etc/init.d/pcsd start
 
 # 5. Start Apache
 /usr/sbin/apache2ctl start
+
+# 6. Run Pacemaker setup ONLY on webz-001
+#    webz-002 and webz-003 just wait to be managed
+if [ "$(hostname)" = "webz-001" ]; then
+    echo "=== Running Pacemaker setup on webz-001 ==="
+    /pacemaker-setup.sh &
+fi
 
 echo "=== All services started on $(hostname) ==="
 

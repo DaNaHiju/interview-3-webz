@@ -1,10 +1,10 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Java and utilities
+# Install Java 17 (required by current Jenkins) and utilities
 RUN apt-get update && apt-get install -y \
-    openjdk-11-jdk \
+    openjdk-21-jdk \
     curl \
     wget \
     gnupg \
@@ -15,13 +15,13 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Add Jenkins repo using apt-key (the method that works on Ubuntu 18.04)
-RUN curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key \
-    | apt-key add - \
-    && echo "deb https://pkg.jenkins.io/debian-stable binary/" \
+# Add Jenkins repo with the current 2026 signing key
+RUN curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key \
+    -o /usr/share/keyrings/jenkins-keyring.asc \
+    && echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" \
     > /etc/apt/sources.list.d/jenkins.list
 
-# Install Jenkins
+# Install Jenkins (Ubuntu 22.04 has init-system-helpers >= 1.54, so this works)
 RUN apt-get update && apt-get install -y jenkins \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -50,5 +50,5 @@ RUN chmod +x /usr/local/bin/webz-monitor.sh
 EXPOSE 8080
 
 USER jenkins
-CMD ["/usr/bin/java", "-jar", "/usr/share/jenkins/jenkins.war", \
+CMD ["/usr/lib/jvm/java-21-openjdk-amd64/bin/java", "-jar", "/usr/share/java/jenkins.war", \
      "--httpPort=8080", "--webroot=/var/cache/jenkins/war"]

@@ -28,9 +28,10 @@ RUN a2dissite 000-default.conf && a2ensite webz.conf
 # Copy homepage — HOSTNAME placeholder replaced at runtime
 COPY apache/index.html /var/www/html/index.html
 
-# Copy entrypoint
+# Copy entrypoint and pacemaker setup script
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY pacemaker-setup.sh /pacemaker-setup.sh
+RUN chmod +x /entrypoint.sh /pacemaker-setup.sh
 
 EXPOSE 80
 
